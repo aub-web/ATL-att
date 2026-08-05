@@ -1,0 +1,44 @@
+// Prisma schema for the outbound team attendance tracker.
+// Runs on Postgres (e.g. Neon) via the pg driver adapter — see
+// src/lib/prisma.ts.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Employee {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?  @unique
+  // Salted hash of the employee-chosen PIN. Null until they set one on
+  // their first visit; admin can clear it back to null to force a reset.
+  pinHash   String?
+  createdAt DateTime @default(now())
+
+  attendanceRecords AttendanceRecord[]
+}
+
+model AttendanceRecord {
+  id         String    @id @default(cuid())
+  employeeId String
+  employee   Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  // Calendar date (stored at midnight UTC) this record belongs to.
+  date       DateTime
+
+  clockIn    DateTime?
+  lunchStart DateTime?
+  lunchEnd   DateTime?
+  clockOut   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([employeeId, date])
+  @@index([date])
+}
