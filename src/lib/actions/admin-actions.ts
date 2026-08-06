@@ -4,12 +4,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin-auth";
-import { parseDateInputValue } from "@/lib/date";
+import { parseDateInputValue, parseDateTimeInputValue } from "@/lib/date";
 import { Prisma } from "@/generated/prisma/client";
 
 function parseDateTimeLocal(value: FormDataEntryValue | null): Date | null {
   if (!value || typeof value !== "string" || value.trim() === "") return null;
-  const date = new Date(value);
+  const date = parseDateTimeInputValue(value);
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
