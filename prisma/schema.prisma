@@ -18,7 +18,7 @@ model Employee {
   // Salted hash of the employee-chosen PIN. Null until they set one on
   // their first visit; admin can clear it back to null to force a reset.
   pinHash   String?
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
 
   attendanceRecords AttendanceRecord[]
 }
@@ -28,16 +28,16 @@ model AttendanceRecord {
   employeeId String
   employee   Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
-  // Calendar date (stored at midnight UTC) this record belongs to.
-  date       DateTime
+  // Calendar date (stored at midnight Manila time) this record belongs to.
+  date       DateTime @db.Timestamptz(3)
 
-  clockIn    DateTime?
-  lunchStart DateTime?
-  lunchEnd   DateTime?
-  clockOut   DateTime?
+  clockIn    DateTime? @db.Timestamptz(3)
+  lunchStart DateTime? @db.Timestamptz(3)
+  lunchEnd   DateTime? @db.Timestamptz(3)
+  clockOut   DateTime? @db.Timestamptz(3)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
 
   @@unique([employeeId, date])
   @@index([date])
