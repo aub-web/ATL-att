@@ -40,3 +40,26 @@ export function canPerformAction(state: PunchState, action: PunchAction): boolea
       );
   }
 }
+
+export interface HoursRecord {
+  clockIn: Date | null;
+  lunchStart: Date | null;
+  lunchEnd: Date | null;
+  clockOut: Date | null;
+}
+
+/** Hours worked (clock-in to clock-out, minus any lunch break), or null if not yet complete. */
+export function computeTotalHours(record: HoursRecord): number | null {
+  if (!record.clockIn || !record.clockOut) return null;
+  const shiftMs = record.clockOut.getTime() - record.clockIn.getTime();
+  const lunchMs =
+    record.lunchStart && record.lunchEnd
+      ? record.lunchEnd.getTime() - record.lunchStart.getTime()
+      : 0;
+  return Math.round(((shiftMs - lunchMs) / 3_600_000) * 100) / 100;
+}
+
+/** Format hours worked as "8.00", or a placeholder if not yet computable. */
+export function formatHours(hours: number | null): string {
+  return hours == null ? "—" : hours.toFixed(2);
+}
