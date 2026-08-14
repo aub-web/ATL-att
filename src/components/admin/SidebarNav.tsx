@@ -34,6 +34,21 @@ function ChartIcon() {
   );
 }
 
+function HomeIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
+      <path
+        d="M3 9.5 10 3l7 6.5M4.5 8v8h11V8"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M8 16v-4h4v4" stroke="white" strokeWidth="1.5" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 const NAV_ITEMS = [
   { href: "/admin", label: "Attendance", color: "bg-sky-500", icon: CalendarIcon },
   { href: "/admin/roster", label: "Roster", color: "bg-violet-500", icon: UsersIcon },
@@ -44,12 +59,12 @@ export default function SidebarNav() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col bg-slate-900">
+    <aside className="flex w-60 shrink-0 flex-col bg-[#6F1F3B]">
       <div className="px-5 py-6">
         <p className="text-base font-semibold tracking-tight text-white">
           Atlas Capture
         </p>
-        <p className="mt-0.5 text-xs text-slate-400">Outbound Team</p>
+        <p className="mt-0.5 text-xs text-white/60">Outbound Team</p>
       </div>
 
       <nav className="flex-1 space-y-1 px-3">
@@ -62,8 +77,8 @@ export default function SidebarNav() {
               href={item.href}
               className={`flex items-center gap-3 rounded-lg border-l-2 py-2 pl-2.5 pr-3 text-sm font-medium transition ${
                 active
-                  ? "border-emerald-400 bg-slate-800 text-white"
-                  : "border-transparent text-slate-300 hover:bg-slate-800/60 hover:text-white"
+                  ? "border-emerald-400 bg-white/10 text-white"
+                  : "border-transparent text-white/70 hover:bg-white/5 hover:text-white"
               }`}
             >
               <span
@@ -77,7 +92,16 @@ export default function SidebarNav() {
         })}
       </nav>
 
-      <div className="border-t border-slate-800 px-3 py-4">
+      <div className="space-y-1 border-t border-white/10 px-3 py-4">
+        <Link
+          href="/"
+          className="flex items-center gap-3 rounded-lg border-l-2 border-transparent py-2 pl-2.5 pr-3 text-sm font-medium text-white/70 transition hover:bg-white/5 hover:text-white"
+        >
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/15">
+            <HomeIcon />
+          </span>
+          Home
+        </Link>
         <LogoutButton />
       </div>
     </aside>
