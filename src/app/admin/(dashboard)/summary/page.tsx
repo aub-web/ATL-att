@@ -1,8 +1,10 @@
 import {
   listAbsences,
   listAttendanceRecords,
+  listCutoffStats,
   listEmployees,
   type Absence,
+  type CutoffPeriod,
 } from "@/lib/admin-data";
 import { formatDate, formatTime, parseDateInputValue, toDateInputValue } from "@/lib/date";
 import { computeTotalHours, formatHours } from "@/lib/attendance";
@@ -12,6 +14,7 @@ interface SearchParams {
   from?: string;
   to?: string;
   employeeId?: string;
+  month?: string;
 }
 
 function buildQueryString(params: SearchParams): string {
@@ -19,6 +22,7 @@ function buildQueryString(params: SearchParams): string {
   if (params.from) search.set("from", params.from);
   if (params.to) search.set("to", params.to);
   if (params.employeeId) search.set("employeeId", params.employeeId);
+  if (params.month) search.set("month", params.month);
   const query = search.toString();
   return query ? `?${query}` : "";
 }
@@ -27,6 +31,100 @@ function buildQueryString(params: SearchParams): string {
 function startOfMonthKey(date: Date): string {
   const [year, month] = toDateInputValue(date).split("-");
   return `${year}-${month}-01`;
+}
+
+/** "yyyy-MM" for the Manila calendar month containing `date`. */
+function monthKey(date: Date): string {
+  return toDateInputValue(date).slice(0, 7);
+}
+
+function formatMonthLabel(month: string): string {
+  const [year, m] = month.split("-").map(Number);
+  return new Date(year, m - 1, 1).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function CutoffChart({
+  title,
+  period,
+}: {
+  title: string;
+  period: CutoffPeriod;
+}) {
+  const rows = period.stats;
+  const maxTotal = Math.max(1, ...rows.map((r) => r.present + r.absent));
+  const barMaxWidth = 600 - 160 - 60;
+  const rowHeight = 32;
+
+  return (
+    <div className="rounded-xl border border-zinc-200 bg-white p-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="text-sm font-semibold text-zinc-900">{title}</h3>
+        <span className="text-xs text-zinc-500">
+          {formatDate(parseDateInputValue(period.from))} – {formatDate(parseDateInputValue(period.to))}
+        </span>
+      </div>
+      <div className="mt-2 flex items-center gap-4 text-xs text-zinc-500">
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500" />
+          Present
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-2.5 w-2.5 rounded-full bg-red-500" />
+          Absent
+        </span>
+      </div>
+
+      {rows.every((r) => r.present + r.absent === 0) ? (
+        <p className="mt-4 text-sm text-zinc-500">No workdays in this cutoff yet.</p>
+      ) : (
+        <svg
+          viewBox={`0 0 600 ${rows.length * rowHeight + 8}`}
+          className="mt-4 w-full"
+          role="img"
+          aria-label={`${title} present and absent days per employee`}
+        >
+          {rows.map((row, i) => {
+            const total = row.present + row.absent;
+            const presentWidth = total > 0 ? (row.present / maxTotal) * barMaxWidth : 0;
+            const absentWidth = total > 0 ? (row.absent / maxTotal) * barMaxWidth : 0;
+            const gap = row.present > 0 && row.absent > 0 ? 2 : 0;
+            const y = i * rowHeight;
+            return (
+              <g key={row.employeeId}>
+                <text x={0} y={y + 20} className="fill-zinc-600" style={{ font: "12px inherit" }}>
+                  {row.employeeName}
+                </text>
+                <rect x={160} y={y + 8} width={barMaxWidth} height={14} rx={7} className="fill-zinc-100" />
+                {row.present > 0 && (
+                  <rect x={160} y={y + 8} width={Math.max(presentWidth, 4)} height={14} rx={7} className="fill-emerald-500">
+                    <title>{`${row.employeeName}: ${row.present} present`}</title>
+                  </rect>
+                )}
+                {row.absent > 0 && (
+                  <rect
+                    x={160 + presentWidth + gap}
+                    y={y + 8}
+                    width={Math.max(absentWidth, 4)}
+                    height={14}
+                    rx={7}
+                    className="fill-red-500"
+                  >
+                    <title>{`${row.employeeName}: ${row.absent} absent`}</title>
+                  </rect>
+                )}
+                <text x={160 + barMaxWidth + 8} y={y + 20} className="fill-zinc-900 font-medium" style={{ font: "11px inherit" }}>
+                  {row.present}P / {row.absent}A
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      )}
+    </div>
+  );
 }
 
 type RecordWithEmployee = AttendanceRecord & { employee: Employee };
@@ -43,11 +141,13 @@ export default async function AdminSummaryPage({
   const todayKey = toDateInputValue(new Date());
   const from = params.from ?? startOfMonthKey(new Date());
   const to = params.to ?? todayKey;
+  const month = params.month ?? monthKey(new Date());
 
-  const [employees, records, absences] = await Promise.all([
+  const [employees, records, absences, cutoffs] = await Promise.all([
     listEmployees(),
     listAttendanceRecords({ ...params, from, to }),
     listAbsences({ from, to, employeeId: params.employeeId }),
+    listCutoffStats(month),
   ]);
 
   const queryString = buildQueryString(params);
@@ -227,6 +327,47 @@ export default async function AdminSummaryPage({
             })}
           </svg>
         )}
+      </div>
+
+      <div className="mt-6 rounded-xl border border-zinc-200 bg-white p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-zinc-900">
+              Present vs. Absent by Cutoff
+            </h2>
+            <p className="mt-0.5 text-xs text-zinc-500">
+              {formatMonthLabel(month)} · workdays only, weekends and
+              Philippine holidays excluded
+            </p>
+          </div>
+          <form method="GET" action="/admin/summary" className="flex items-end gap-2">
+            {params.from && <input type="hidden" name="from" value={params.from} />}
+            {params.to && <input type="hidden" name="to" value={params.to} />}
+            {params.employeeId && (
+              <input type="hidden" name="employeeId" value={params.employeeId} />
+            )}
+            <div>
+              <label className="block text-xs font-medium text-zinc-500">Month</label>
+              <input
+                type="month"
+                name="month"
+                defaultValue={month}
+                className="mt-1 rounded-lg border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900"
+              />
+            </div>
+            <button
+              type="submit"
+              className="rounded-lg bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-800"
+            >
+              Go
+            </button>
+          </form>
+        </div>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <CutoffChart title="1st Cutoff (1–15)" period={cutoffs.cutoff1} />
+          <CutoffChart title="2nd Cutoff (16–end)" period={cutoffs.cutoff2} />
+        </div>
       </div>
 
       <div className="mt-6 space-y-6">
