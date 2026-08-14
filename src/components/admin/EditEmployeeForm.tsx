@@ -14,6 +14,7 @@ export default function EditEmployeeForm({
     id: string;
     name: string;
     email: string | null;
+    startDate: string | null;
     endDate: string | null;
   };
 }) {
@@ -51,6 +52,23 @@ export default function EditEmployeeForm({
           defaultValue={employee.email ?? ""}
           className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900"
         />
+      </div>
+
+      <div>
+        <label htmlFor="startDate" className="block text-sm font-medium text-zinc-700">
+          Start Date (optional)
+        </label>
+        <input
+          id="startDate"
+          name="startDate"
+          type="date"
+          defaultValue={employee.startDate ?? ""}
+          className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900"
+        />
+        <p className="mt-1 text-xs text-zinc-500">
+          First working day. Before it, they're hidden from the clock-in
+          picker and not counted toward absences. Leave blank if unknown.
+        </p>
       </div>
 
       <div>

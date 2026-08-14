@@ -92,7 +92,8 @@ export async function listAbsences(filters: {
   const absences: Absence[] = [];
   for (const day of workdays) {
     for (const employee of employees) {
-      // Past their last working day, they're no longer expected to show up.
+      // Outside their employment window, they're not expected to show up.
+      if (employee.startDate && day < toDateInputValue(employee.startDate)) continue;
       if (employee.endDate && day > toDateInputValue(employee.endDate)) continue;
       if (!present.has(`${employee.id}:${day}`)) {
         absences.push({ date: day, employeeId: employee.id, employeeName: employee.name });

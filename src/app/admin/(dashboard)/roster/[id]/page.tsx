@@ -38,6 +38,7 @@ export default async function EditEmployeePage({
           id: employee.id,
           name: employee.name,
           email: employee.email,
+          startDate: employee.startDate ? toDateInputValue(employee.startDate) : null,
           endDate: employee.endDate ? toDateInputValue(employee.endDate) : null,
         }}
       />

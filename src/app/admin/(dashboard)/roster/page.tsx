@@ -58,6 +58,10 @@ export default async function RosterPage() {
                     <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
                       Ended {formatDate(employee.endDate)}
                     </span>
+                  ) : employee.startDate && toDateInputValue(employee.startDate) > todayKey ? (
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">
+                      Starts {formatDate(employee.startDate)}
+                    </span>
                   ) : (
                     <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
                       Active

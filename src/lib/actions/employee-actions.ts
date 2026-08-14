@@ -13,8 +13,14 @@ export interface EmployeeOption {
 
 /** Public roster for the "who are you?" picker — names only, no PIN state. */
 export async function listEmployeeRoster(): Promise<EmployeeOption[]> {
+  const today = startOfDay();
   const employees = await prisma.employee.findMany({
-    where: { OR: [{ endDate: null }, { endDate: { gte: startOfDay() } }] },
+    where: {
+      AND: [
+        { OR: [{ startDate: null }, { startDate: { lte: today } }] },
+        { OR: [{ endDate: null }, { endDate: { gte: today } }] },
+      ],
+    },
     orderBy: { name: "asc" },
     select: { id: true, name: true },
   });

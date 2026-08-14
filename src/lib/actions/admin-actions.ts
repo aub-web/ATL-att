@@ -134,6 +134,8 @@ export async function updateEmployeeProfile(
   const id = String(formData.get("id") ?? "");
   const name = String(formData.get("name") ?? "").trim();
   const email = normalizeOptionalEmail(formData.get("email"));
+  const startDateValue = String(formData.get("startDate") ?? "").trim();
+  const startDate = startDateValue ? parseDateInputValue(startDateValue) : null;
   const endDateValue = String(formData.get("endDate") ?? "").trim();
   const endDate = endDateValue ? parseDateInputValue(endDateValue) : null;
 
@@ -142,7 +144,7 @@ export async function updateEmployeeProfile(
   }
 
   try {
-    await prisma.employee.update({ where: { id }, data: { name, email, endDate } });
+    await prisma.employee.update({ where: { id }, data: { name, email, startDate, endDate } });
   } catch (err) {
     if (
       err instanceof Prisma.PrismaClientKnownRequestError &&
