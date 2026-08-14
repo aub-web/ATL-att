@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import LogoutButton from "@/components/admin/LogoutButton";
+import SidebarNav from "@/components/admin/SidebarNav";
 
 export default async function AdminDashboardLayout({
   children,
@@ -13,34 +12,10 @@ export default async function AdminDashboardLayout({
   }
 
   return (
-    <div className="flex flex-1 flex-col">
-      <header className="border-b border-zinc-200 bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
-          <nav className="flex items-center gap-1">
-            <Link
-              href="/admin"
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
-            >
-              Attendance
-            </Link>
-            <Link
-              href="/admin/roster"
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
-            >
-              Roster
-            </Link>
-            <Link
-              href="/admin/summary"
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
-            >
-              Summary
-            </Link>
-          </nav>
-          <LogoutButton />
-        </div>
-      </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">
-        {children}
+    <div className="flex flex-1">
+      <SidebarNav />
+      <main className="min-w-0 flex-1 overflow-x-auto px-4 py-6 sm:px-8">
+        <div className="mx-auto w-full max-w-5xl">{children}</div>
       </main>
     </div>
   );
