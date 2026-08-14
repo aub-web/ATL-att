@@ -10,7 +10,12 @@ import {
 export default function EditEmployeeForm({
   employee,
 }: {
-  employee: { id: string; name: string; email: string | null };
+  employee: {
+    id: string;
+    name: string;
+    email: string | null;
+    endDate: string | null;
+  };
 }) {
   const [state, formAction, isPending] = useActionState<
     UpdateEmployeeState,
@@ -46,6 +51,24 @@ export default function EditEmployeeForm({
           defaultValue={employee.email ?? ""}
           className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900"
         />
+      </div>
+
+      <div>
+        <label htmlFor="endDate" className="block text-sm font-medium text-zinc-700">
+          End Date (optional)
+        </label>
+        <input
+          id="endDate"
+          name="endDate"
+          type="date"
+          defaultValue={employee.endDate ?? ""}
+          className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900"
+        />
+        <p className="mt-1 text-xs text-zinc-500">
+          Last working day. Once set, they drop off the clock-in picker and
+          stop counting toward absences — their history is kept. Leave blank
+          for active employees.
+        </p>
       </div>
 
       {state?.error && (

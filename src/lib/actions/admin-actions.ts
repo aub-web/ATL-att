@@ -134,13 +134,15 @@ export async function updateEmployeeProfile(
   const id = String(formData.get("id") ?? "");
   const name = String(formData.get("name") ?? "").trim();
   const email = normalizeOptionalEmail(formData.get("email"));
+  const endDateValue = String(formData.get("endDate") ?? "").trim();
+  const endDate = endDateValue ? parseDateInputValue(endDateValue) : null;
 
   if (!name) {
     return { error: "Name is required." };
   }
 
   try {
-    await prisma.employee.update({ where: { id }, data: { name, email } });
+    await prisma.employee.update({ where: { id }, data: { name, email, endDate } });
   } catch (err) {
     if (
       err instanceof Prisma.PrismaClientKnownRequestError &&

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getEmployee } from "@/lib/admin-data";
+import { toDateInputValue } from "@/lib/date";
 import EditEmployeeForm from "@/components/admin/EditEmployeeForm";
 
 export default async function EditEmployeePage({
@@ -33,7 +34,12 @@ export default async function EditEmployeePage({
       </p>
 
       <EditEmployeeForm
-        employee={{ id: employee.id, name: employee.name, email: employee.email }}
+        employee={{
+          id: employee.id,
+          name: employee.name,
+          email: employee.email,
+          endDate: employee.endDate ? toDateInputValue(employee.endDate) : null,
+        }}
       />
     </div>
   );

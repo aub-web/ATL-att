@@ -19,6 +19,10 @@ model Employee {
   // their first visit; admin can clear it back to null to force a reset.
   pinHash   String?
   createdAt DateTime @default(now()) @db.Timestamptz(3)
+  // Last working day (inclusive), Manila midnight. Null means still active.
+  // Past their end date, they drop off the clock-in picker and stop being
+  // counted toward absences, but their attendance history is kept.
+  endDate   DateTime? @db.Timestamptz(3)
 
   attendanceRecords AttendanceRecord[]
 }

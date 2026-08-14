@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { listEmployees } from "@/lib/admin-data";
 import { removeEmployee, resetEmployeePin } from "@/lib/actions/admin-actions";
-import { formatDate } from "@/lib/date";
+import { formatDate, toDateInputValue } from "@/lib/date";
 import AddEmployeeForm from "@/components/admin/AddEmployeeForm";
 import ConfirmSubmitButton from "@/components/admin/ConfirmSubmitButton";
 
 export default async function RosterPage() {
   const employees = await listEmployees();
+  const todayKey = toDateInputValue(new Date());
 
   return (
     <div>
@@ -27,6 +28,7 @@ export default async function RosterPage() {
             <tr>
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Email</th>
+              <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">PIN</th>
               <th className="px-4 py-3 font-medium">Added</th>
               <th className="px-4 py-3 font-medium text-right">Actions</th>
@@ -36,7 +38,7 @@ export default async function RosterPage() {
             {employees.length === 0 && (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="px-4 py-8 text-center text-sm text-zinc-500"
                 >
                   No employees yet. Add your first team member above.
@@ -50,6 +52,17 @@ export default async function RosterPage() {
                 </td>
                 <td className="px-4 py-3 text-zinc-600">
                   {employee.email ?? "—"}
+                </td>
+                <td className="px-4 py-3">
+                  {employee.endDate && toDateInputValue(employee.endDate) <= todayKey ? (
+                    <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
+                      Ended {formatDate(employee.endDate)}
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
+                      Active
+                    </span>
+                  )}
                 </td>
                 <td className="px-4 py-3">
                   {employee.pinHash ? (
