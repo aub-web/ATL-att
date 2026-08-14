@@ -2,6 +2,12 @@ import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import SidebarNav from "@/components/admin/SidebarNav";
 
+// Attendance data changes constantly (punches, admin edits, imports run
+// directly against the DB) — these pages must never serve a cached response.
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+
 export default async function AdminDashboardLayout({
   children,
 }: {
